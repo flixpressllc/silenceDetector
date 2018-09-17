@@ -1,4 +1,4 @@
-﻿namespace silenceDetector
+﻿namespace FlixpressFFMPEG.SilenceDetector
 {
     public class TimeInterval
     {

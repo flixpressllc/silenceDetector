@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace silenceDetector
+namespace FlixpressFFMPEG.SilenceDetector
 {
     public static class Helpers
     {

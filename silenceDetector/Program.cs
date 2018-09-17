@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Text.RegularExpressions;
+﻿using FlixpressFFMPEG.SilenceDetector;
+using System;
 
 namespace silenceDetector
 {
@@ -10,36 +7,14 @@ namespace silenceDetector
     {
         static void Main(string[] args)
         {
+            string ffmpegExecutablePath = @"c:\tools\ffmpegnew.exe";
             string inputFilename = "testL.mp4";
             string outputFilename = "trimmed.mp4";
+            double fullDurationOfClip = 11.45;
+            double startTimeThreshhold = 0.5;
+            double endTimeTrheshhold = 0.5;
 
-            Process ffmpeg = new Process();
-
-            ffmpeg.StartInfo.FileName = @"c:\tools\ffmpegnew.exe";
-            ffmpeg.StartInfo.Arguments = @"-i c:\temp\testL.mp4 -af silencedetect=noise=-20dB:d=0.5 -f null -";
-            ffmpeg.StartInfo.UseShellExecute = false;
-            ffmpeg.StartInfo.RedirectStandardError = true;
-            ffmpeg.Start();
-            string output = ffmpeg.StandardError.ReadToEnd();
-
-            TimeInterval timeIntervalToKeep = Helpers.ObtainClipToKeep(output, 11.5);
-
-            ffmpeg.WaitForExit();
-
-            if (timeIntervalToKeep == null)
-            {
-                ffmpeg.StartInfo.Arguments = @"-i c:\temp\" + inputFilename + "  -ss 0.3 -c:v libx264 -crf 0 -preset ultrafast -c:a copy -y c:\\temp\\" + outputFilename;
-                ffmpeg.StartInfo.RedirectStandardError = false;
-                ffmpeg.Start();
-                ffmpeg.WaitForExit();
-            }
-            else
-            {
-                ffmpeg.StartInfo.Arguments = @"-i c:\temp\" + inputFilename + " -ss " + timeIntervalToKeep.Start + " -c:v libx264 -crf 0 -preset ultrafast -c:a copy -y -to " + (timeIntervalToKeep.End + 0.5) + " c:\\temp\\" + outputFilename;
-                ffmpeg.StartInfo.RedirectStandardError = false;
-                ffmpeg.Start();
-                ffmpeg.WaitForExit();
-            }
+            SilenceDetectorExecutor.Execute(ffmpegExecutablePath, inputFilename, outputFilename, fullDurationOfClip, startTimeThreshhold, endTimeTrheshhold);
 
             Console.ReadKey();
 
