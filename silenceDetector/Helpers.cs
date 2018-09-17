@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace silenceDetector
@@ -35,33 +34,90 @@ namespace silenceDetector
             return silenceTimeIntervals;
         }
 
-        public static TimeInterval ObtainClipToKeep(string silenceQueryOutput, double fullDurationOfClip)
+        private static double DetermineEndTimeOfClipToKeep(TimeInterval lastSilenceTimeInterval, double fullDurationOfClip, double endTimeThreshhold)
         {
+            double endThreshholdMark = fullDurationOfClip - endTimeThreshhold;
+
+            if (lastSilenceTimeInterval.Start < endThreshholdMark)
+            {
+                if (!lastSilenceTimeInterval.End.HasValue)
+                    return lastSilenceTimeInterval.Start;
+
+                if (lastSilenceTimeInterval.End.Value < endThreshholdMark)
+                    return fullDurationOfClip;
+            }
+
+            return fullDurationOfClip;
+        }
+
+        private static double DetermineStartTimeOfClipToKeep(TimeInterval firstSilenceTimeInterval, double startTimeThreshhold)
+        {
+            if (firstSilenceTimeInterval.Start > startTimeThreshhold)
+                return 0;
+            
+            if (!firstSilenceTimeInterval.End.HasValue && firstSilenceTimeInterval.End.Value > startTimeThreshhold)
+                return firstSilenceTimeInterval.End.Value;
+
+            return 0;
+        }
+
+        private static TimeInterval DetermineTimeIntervalToKeepIfOnlyOneSilenceInverval(TimeInterval loneSilenceTimeInterval, double fullDurationOfClip, double startTimeThreshhold,
+            double endTimeThreshhold)
+        {
+            double endThreshholdMark = fullDurationOfClip - endTimeThreshhold;
+
+            if (loneSilenceTimeInterval.Start > startTimeThreshhold && loneSilenceTimeInterval.End.HasValue && loneSilenceTimeInterval.End.Value < endThreshholdMark)
+                return new TimeInterval()
+                {
+                    Start = 0,
+                    End = fullDurationOfClip
+                };
+
+            return new TimeInterval
+            {
+                Start = (loneSilenceTimeInterval.Start < startTimeThreshhold) ? 0 : loneSilenceTimeInterval.Start,
+                End = DetermineEndTimeOfClipToKeep(loneSilenceTimeInterval, fullDurationOfClip, endTimeThreshhold)
+            };
+        }
+
+        /* If this function returns null, it means that we should just copy the clip.
+         */
+        public static TimeInterval ObtainClipToKeep(string silenceQueryOutput, double fullDurationOfClip, double startTimeThreshhold = 0.5, double endTimeThreshhold = 0.5)
+        {
+            /* startTimeThrehhold means that if the first silence interval ends before the threshhold, the start of the desired clip will be  0.
+             * endTimeThreshhold means that if the last silence interval starts after the threshhold, the end of the desired clip will be fullDurationOfClip.
+             */
             List<TimeInterval> allSilenceTimeIntervals = ExtractSilenceTimeIntervals(silenceQueryOutput);
 
             if (allSilenceTimeIntervals.Count == 0)
                 return null;
 
+            TimeInterval timeIntervalToClip = new TimeInterval();
+
             if (allSilenceTimeIntervals.Count == 1)
             {
-
-                return new TimeInterval();
+                timeIntervalToClip = DetermineTimeIntervalToKeepIfOnlyOneSilenceInverval(allSilenceTimeIntervals[0], fullDurationOfClip, startTimeThreshhold, endTimeThreshhold);
             }
             else 
             {
                 /* If we have more than one silence intervals, we'll need to take the first interval's 
-                 * 
+                 * end value and the last silent time interval's start.
                  */
 
                 int indexOfLastInterval = allSilenceTimeIntervals.Count - 1;
 
-                return new TimeInterval
+                timeIntervalToClip = new TimeInterval
                 {
-                    Start = allSilenceTimeIntervals[0].End.Value,
-                    End = allSilenceTimeIntervals[indexOfLastInterval].Start
-                };
-            
+                    //Start = (allSilenceTimeIntervals[0].End.Value < startTimeThreshhold) ? 0 : allSilenceTimeIntervals[0].End.Value,
+                    Start = DetermineStartTimeOfClipToKeep(allSilenceTimeIntervals[0], startTimeThreshhold),
+                    End = DetermineEndTimeOfClipToKeep(allSilenceTimeIntervals[indexOfLastInterval], fullDurationOfClip, endTimeThreshhold)
+                };       
             }
+
+            if (timeIntervalToClip.Start == 0 && timeIntervalToClip.End == fullDurationOfClip)
+                return null;
+            
+            return timeIntervalToClip;
         }
     }
 }
