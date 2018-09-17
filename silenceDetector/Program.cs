@@ -12,9 +12,9 @@ namespace silenceDetector
             string outputFilename = "trimmed.mp4";
             double fullDurationOfClip = 11.45;
             double startTimeThreshhold = 0.5;
-            double endTimeTrheshhold = 0.5;
+            double endTimeThreshhold = 0.5;
 
-            SilenceDetectorExecutor.Execute(ffmpegExecutablePath, inputFilename, outputFilename, fullDurationOfClip, startTimeThreshhold, endTimeTrheshhold);
+            SilenceDetectorExecutor.Execute(ffmpegExecutablePath, inputFilename, outputFilename, fullDurationOfClip, startTimeThreshhold, endTimeThreshhold);
 
             Console.ReadKey();
 
