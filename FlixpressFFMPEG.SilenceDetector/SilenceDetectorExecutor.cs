@@ -4,13 +4,12 @@ namespace FlixpressFFMPEG.SilenceDetector
 {
     public static class SilenceDetectorExecutor
     {
-        public static void Execute(string ffmpegExecutablePath, string inputFilename, string outputFilename,
+        public static double Execute(string ffmpegExecutablePath, string inputFilename, string outputFilename,
             double fullDurationOfClip, double startTimeThreshhod = 0.5, double endTimeThreshhold = 0.5)
         {
             Process ffmpeg = new Process();
-
-            ffmpeg.StartInfo.FileName =
-            ffmpeg.StartInfo.Arguments = @"-i c:\temp\testL.mp4 -af silencedetect=noise=-20dB:d=0.5 -f null -";
+            ffmpeg.StartInfo.FileName = ffmpegExecutablePath;
+            ffmpeg.StartInfo.Arguments = @"-i " + inputFilename + " -af silencedetect=noise=-20dB:d=0.5 -f null -";
             ffmpeg.StartInfo.UseShellExecute = false;
             ffmpeg.StartInfo.RedirectStandardError = true;
             ffmpeg.Start();
@@ -21,18 +20,24 @@ namespace FlixpressFFMPEG.SilenceDetector
 
             if (timeIntervalToKeep == null)
             {
-                ffmpeg.StartInfo.Arguments = @"-i c:\temp\" + inputFilename + "  -ss 0.3 -c:v libx264 -crf 0 -preset ultrafast -c:a copy -y c:\\temp\\" + outputFilename;
+                ffmpeg.StartInfo.Arguments = @"-i " + inputFilename + "  -ss 0.3 -c:v libx264 -crf 0 -preset ultrafast -c:a copy -y " + outputFilename;
                 ffmpeg.StartInfo.RedirectStandardError = false;
                 ffmpeg.Start();
                 ffmpeg.WaitForExit();
+
+                return fullDurationOfClip;
             }
             else
             {
-                ffmpeg.StartInfo.Arguments = @"-i c:\temp\" + inputFilename + " -ss " + timeIntervalToKeep.Start + " -c:v libx264 -crf 0 -preset ultrafast -c:a copy -y -to " + (timeIntervalToKeep.End + 0.5) + " c:\\temp\\" + outputFilename;
+                ffmpeg.StartInfo.Arguments = @"-i " + inputFilename + " -ss " + timeIntervalToKeep.Start + " -c:v libx264 -crf 0 -preset ultrafast -c:a copy -y -to " + (timeIntervalToKeep.End + 0.5) + " " + outputFilename;
                 ffmpeg.StartInfo.RedirectStandardError = false;
                 ffmpeg.Start();
                 ffmpeg.WaitForExit();
+
+                return (timeIntervalToKeep.End.Value + 0.5 - timeIntervalToKeep.Start);
             }
+
+           
         }
     }
 }
