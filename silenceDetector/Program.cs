@@ -8,9 +8,9 @@ namespace silenceDetector
         static void Main(string[] args)
         {
             string ffmpegExecutablePath = @"c:\tools\ffmpegnew.exe";
-            string inputFilename = "testL.mp4";
-            string outputFilename = "trimmed.mp4";
-            double fullDurationOfClip = 11.45;
+            string inputFilename = @"c:\temp\testL.mp4";
+            string outputFilename = @"c:\temp\trimmed.mp4";
+            double fullDurationOfClip = 24.78;
             double startTimeThreshhold = 0.5;
             double endTimeThreshhold = 0.5;
 

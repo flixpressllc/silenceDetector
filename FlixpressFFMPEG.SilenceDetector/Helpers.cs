@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace FlixpressFFMPEG.SilenceDetector
@@ -43,8 +44,10 @@ namespace FlixpressFFMPEG.SilenceDetector
                 if (!lastSilenceTimeInterval.End.HasValue)
                     return lastSilenceTimeInterval.Start;
 
-                if (lastSilenceTimeInterval.End.Value < endThreshholdMark)
+                if (lastSilenceTimeInterval.End.Value > endThreshholdMark)
                     return fullDurationOfClip;
+                else
+                    return lastSilenceTimeInterval.Start;
             }
 
             return fullDurationOfClip;
@@ -55,29 +58,48 @@ namespace FlixpressFFMPEG.SilenceDetector
             if (firstSilenceTimeInterval.Start > startTimeThreshhold)
                 return 0;
             
-            if (!firstSilenceTimeInterval.End.HasValue && firstSilenceTimeInterval.End.Value > startTimeThreshhold)
+            if (firstSilenceTimeInterval.End.HasValue && firstSilenceTimeInterval.End.Value > startTimeThreshhold)
                 return firstSilenceTimeInterval.End.Value;
 
             return 0;
         }
-
+        
         private static TimeInterval DetermineTimeIntervalToKeepIfOnlyOneSilenceInverval(TimeInterval loneSilenceTimeInterval, double fullDurationOfClip, double startTimeThreshhold,
             double endTimeThreshhold)
         {
             double endThreshholdMark = fullDurationOfClip - endTimeThreshhold;
 
-            if (loneSilenceTimeInterval.Start > startTimeThreshhold && loneSilenceTimeInterval.End.HasValue && loneSilenceTimeInterval.End.Value < endThreshholdMark)
-                return new TimeInterval()
-                {
-                    Start = 0,
-                    End = fullDurationOfClip
-                };
+            if (loneSilenceTimeInterval.Start > startTimeThreshhold)
+            {
+                if (!loneSilenceTimeInterval.End.HasValue)
+                    return new TimeInterval()
+                    {
+                        Start = 0,
+                        End = loneSilenceTimeInterval.Start
+                    };
+                else if (loneSilenceTimeInterval.End.Value < endThreshholdMark)
+                    return new TimeInterval()
+                    {
+                        Start = 0,
+                        End = fullDurationOfClip
+                    };
+            }                
 
             return new TimeInterval
             {
                 Start = (loneSilenceTimeInterval.Start < startTimeThreshhold) ? 0 : loneSilenceTimeInterval.Start,
                 End = DetermineEndTimeOfClipToKeep(loneSilenceTimeInterval, fullDurationOfClip, endTimeThreshhold)
             };
+        }
+
+        private static void RemoveLastFewShortTimeIntervals(List<TimeInterval> allSilenceTimeIntervals, double cutoffPoint)
+        {
+            List<TimeInterval> timeIntervalsToDelete = allSilenceTimeIntervals.Where(ti => ti.Start > cutoffPoint).ToList();
+
+            foreach(TimeInterval timeIntervalToDelete in timeIntervalsToDelete)
+            {
+                allSilenceTimeIntervals.Remove(timeIntervalToDelete);
+            }
         }
 
         /* If this function returns null, it means that we should just copy the clip.
@@ -88,6 +110,8 @@ namespace FlixpressFFMPEG.SilenceDetector
              * endTimeThreshhold means that if the last silence interval starts after the threshhold, the end of the desired clip will be fullDurationOfClip.
              */
             List<TimeInterval> allSilenceTimeIntervals = ExtractSilenceTimeIntervals(silenceQueryOutput);
+
+            RemoveLastFewShortTimeIntervals(allSilenceTimeIntervals, fullDurationOfClip - 2); // Remove silence intervals that start during the last 2 seconds of the clip.
 
             if (allSilenceTimeIntervals.Count == 0)
                 return null;
@@ -104,11 +128,13 @@ namespace FlixpressFFMPEG.SilenceDetector
                  * end value and the last silent time interval's start.
                  */
 
+                /* We will need to chop off the last n time intervals whose start time is beyond three seconds to the end.
+                 */
+
                 int indexOfLastInterval = allSilenceTimeIntervals.Count - 1;
 
                 timeIntervalToClip = new TimeInterval
                 {
-                    //Start = (allSilenceTimeIntervals[0].End.Value < startTimeThreshhold) ? 0 : allSilenceTimeIntervals[0].End.Value,
                     Start = DetermineStartTimeOfClipToKeep(allSilenceTimeIntervals[0], startTimeThreshhold),
                     End = DetermineEndTimeOfClipToKeep(allSilenceTimeIntervals[indexOfLastInterval], fullDurationOfClip, endTimeThreshhold)
                 };       
