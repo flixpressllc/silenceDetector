@@ -59,7 +59,7 @@ namespace FlixpressFFMPEG.SilenceDetector
                 return 0;
             
             if (firstSilenceTimeInterval.End.HasValue && firstSilenceTimeInterval.End.Value > startTimeThreshhold)
-                return firstSilenceTimeInterval.End.Value;
+                return firstSilenceTimeInterval.End.Value - 0.3;
 
             return 0;
         }

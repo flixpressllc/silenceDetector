@@ -29,7 +29,7 @@ namespace FlixpressFFMPEG.SilenceDetector
             }
             else
             {
-                ffmpeg.StartInfo.Arguments = @"-i " + inputFilename + " -ss " + timeIntervalToKeep.Start + " -c:v libx264 -crf 0 -preset ultrafast -c:a copy -y -to " + (timeIntervalToKeep.End + 0.5) + " " + outputFilename;
+                ffmpeg.StartInfo.Arguments = @"-i " + inputFilename + " -ss " + timeIntervalToKeep.Start  + " -c:v libx264 -crf 0 -preset ultrafast -c:a copy -y -to " + (timeIntervalToKeep.End + 0.5) + " " + outputFilename;
                 ffmpeg.StartInfo.RedirectStandardError = false;
                 ffmpeg.Start();
                 ffmpeg.WaitForExit();
