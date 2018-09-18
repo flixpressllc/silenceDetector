@@ -9,7 +9,7 @@ namespace FlixpressFFMPEG.SilenceDetector
         {
             Process ffmpeg = new Process();
             ffmpeg.StartInfo.FileName = ffmpegExecutablePath;
-            ffmpeg.StartInfo.Arguments = @"-i " + inputFilename + " -af silencedetect=noise=-20dB:d=0.5 -f null -";
+            ffmpeg.StartInfo.Arguments = @"-i " + inputFilename + " -af silencedetect=noise=-15dB:d=0.5 -f null -";
             ffmpeg.StartInfo.UseShellExecute = false;
             ffmpeg.StartInfo.RedirectStandardError = true;
             ffmpeg.Start();

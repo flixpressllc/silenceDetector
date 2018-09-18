@@ -92,16 +92,6 @@ namespace FlixpressFFMPEG.SilenceDetector
             };
         }
 
-        private static void RemoveLastFewShortTimeIntervals(List<TimeInterval> allSilenceTimeIntervals, double cutoffPoint)
-        {
-            List<TimeInterval> timeIntervalsToDelete = allSilenceTimeIntervals.Where(ti => ti.Start > cutoffPoint).ToList();
-
-            foreach(TimeInterval timeIntervalToDelete in timeIntervalsToDelete)
-            {
-                allSilenceTimeIntervals.Remove(timeIntervalToDelete);
-            }
-        }
-
         /* If this function returns null, it means that we should just copy the clip.
          */
         public static TimeInterval ObtainClipToKeep(string silenceQueryOutput, double fullDurationOfClip, double startTimeThreshhold = 0.5, double endTimeThreshhold = 0.5)
@@ -110,8 +100,6 @@ namespace FlixpressFFMPEG.SilenceDetector
              * endTimeThreshhold means that if the last silence interval starts after the threshhold, the end of the desired clip will be fullDurationOfClip.
              */
             List<TimeInterval> allSilenceTimeIntervals = ExtractSilenceTimeIntervals(silenceQueryOutput);
-
-            RemoveLastFewShortTimeIntervals(allSilenceTimeIntervals, fullDurationOfClip - 2); // Remove silence intervals that start during the last 2 seconds of the clip.
 
             if (allSilenceTimeIntervals.Count == 0)
                 return null;
@@ -123,11 +111,7 @@ namespace FlixpressFFMPEG.SilenceDetector
                 timeIntervalToClip = DetermineTimeIntervalToKeepIfOnlyOneSilenceInverval(allSilenceTimeIntervals[0], fullDurationOfClip, startTimeThreshhold, endTimeThreshhold);
             }
             else 
-            {
-                /* If we have more than one silence intervals, we'll need to take the first interval's 
-                 * end value and the last silent time interval's start.
-                 */
-
+            {              
                 /* We will need to chop off the last n time intervals whose start time is beyond three seconds to the end.
                  */
 
