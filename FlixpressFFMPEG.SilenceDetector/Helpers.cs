@@ -106,6 +106,12 @@ namespace FlixpressFFMPEG.SilenceDetector
 
             TimeInterval timeIntervalToClip = new TimeInterval();
 
+            TimeInterval lastSilenceTimeInterval = allSilenceTimeIntervals[allSilenceTimeIntervals.Count - 1];
+
+            if (lastSilenceTimeInterval.End.HasValue && ((fullDurationOfClip - 2.0) > lastSilenceTimeInterval.End.Value) && (lastSilenceTimeInterval.End.Value - lastSilenceTimeInterval.Start) < 2)
+                lastSilenceTimeInterval.End = fullDurationOfClip;
+                
+
             if (allSilenceTimeIntervals.Count == 1)
             {
                 timeIntervalToClip = DetermineTimeIntervalToKeepIfOnlyOneSilenceInverval(allSilenceTimeIntervals[0], fullDurationOfClip, startTimeThreshhold, endTimeThreshhold);
