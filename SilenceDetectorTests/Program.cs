@@ -1,6 +1,7 @@
 ﻿using FlixpressFFMPEG.SilenceDetector;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SilenceDetectorTests
 {
@@ -20,6 +21,9 @@ namespace SilenceDetectorTests
             List<TimeInterval> audibleTimeIntervals = Helpers.ExtractAudibleTimeIntervals(silenceIntervals);
 
             var dummy = 15;
+
+            string inputFilename = @"D:/folder/subfolder/myfile.mp4";
+
 
             Console.ReadLine();
         }
