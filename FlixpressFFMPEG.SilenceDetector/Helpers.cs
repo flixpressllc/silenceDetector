@@ -34,6 +34,56 @@ namespace FlixpressFFMPEG.SilenceDetector
 
             return silenceTimeIntervals;
         }
+        
+        public static List<TimeInterval> ExtractAudibleTimeIntervals(List<TimeInterval> allSilenceTimeIntervals, double minimumSilenceIntervalToCut = 1.0, double audibleClipSilencePadding = 0.2)
+        {
+            /* Here's where we'll do the math. We'll test this one extensively before involving FFMPEG.
+             */
+            List<TimeInterval> longEnoughTimeIntervals = new List<TimeInterval>();
+
+            allSilenceTimeIntervals.ForEach(timeInterval =>
+            {
+                int indexOfTimeInterval = allSilenceTimeIntervals.IndexOf(timeInterval);
+
+                if (indexOfTimeInterval == 0 || indexOfTimeInterval == allSilenceTimeIntervals.Count - 1)
+                    longEnoughTimeIntervals.Add(timeInterval);
+                else
+                {
+                    double? duration = timeInterval.CalculateDuration();
+
+                    if (duration.HasValue && duration >= minimumSilenceIntervalToCut)
+                        longEnoughTimeIntervals.Add(timeInterval);
+                }
+            });
+
+            List<TimeInterval> audibleTimeIntervals = new List<TimeInterval>();
+
+            /* At this point, all silence time intervals >= 1 second AND the first and last time intervals will be added!
+             * So now, it's time to construct
+             */
+            for (int i = 0; i < longEnoughTimeIntervals.Count - 1; i++)
+            {
+                // Can't just say longEnoughTimeIntervals[i+1]
+                TimeInterval timeInterval = longEnoughTimeIntervals[i];
+                TimeInterval nextTimeInterval = longEnoughTimeIntervals[i + 1];
+
+                TimeInterval audibleTimeInterval = new TimeInterval(
+                    start: Math.Max(0, timeInterval.End.Value - audibleClipSilencePadding),
+                    end: nextTimeInterval.Start + audibleClipSilencePadding);
+
+                audibleTimeIntervals.Add(audibleTimeInterval);
+            }
+
+            return audibleTimeIntervals;
+        }
+
+        public static List<TimeInterval> ExtractAudibleTimeIntervals(string silenceQueryOutput, double minimumSilenceIntervalToCut = 1.0, double audibleClipSilencePadding = 0.2)
+        {
+            List<TimeInterval> allSilenceTimeIntervals = ExtractSilenceTimeIntervals(silenceQueryOutput);
+
+            return ExtractAudibleTimeIntervals(allSilenceTimeIntervals, minimumSilenceIntervalToCut, audibleClipSilencePadding);
+        }
+
 
         private static double DetermineEndTimeOfClipToKeep(TimeInterval lastSilenceTimeInterval, double fullDurationOfClip, double endTimeThreshhold)
         {

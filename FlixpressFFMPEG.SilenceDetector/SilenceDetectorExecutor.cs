@@ -4,8 +4,7 @@ namespace FlixpressFFMPEG.SilenceDetector
 {
     public static class SilenceDetectorExecutor
     {
-        public static double Execute(string ffmpegExecutablePath, string inputFilename, string outputFilename,
-            double fullDurationOfClip, double startTimeThreshhod = 0.5, double endTimeThreshhold = 0.5)
+        public static string ExecuteForSilenceIntervalsOutput(string ffmpegExecutablePath, string inputFilename)
         {
             Process ffmpeg = new Process();
             ffmpeg.StartInfo.FileName = ffmpegExecutablePath;
@@ -16,7 +15,18 @@ namespace FlixpressFFMPEG.SilenceDetector
             string output = ffmpeg.StandardError.ReadToEnd();
             ffmpeg.WaitForExit();
 
+            return output;
+        }
+
+        public static double Execute(string ffmpegExecutablePath, string inputFilename, string outputFilename,
+            double fullDurationOfClip, double startTimeThreshhod = 0.5, double endTimeThreshhold = 0.5)
+        {
+            string output = ExecuteForSilenceIntervalsOutput(ffmpegExecutablePath, inputFilename);
+
             TimeInterval timeIntervalToKeep = Helpers.ObtainClipToKeep(output, fullDurationOfClip, startTimeThreshhod, endTimeThreshhold);
+
+            Process ffmpeg = new Process();
+            ffmpeg.StartInfo.FileName = ffmpegExecutablePath;
 
             if (timeIntervalToKeep == null)
             {
@@ -36,8 +46,6 @@ namespace FlixpressFFMPEG.SilenceDetector
 
                 return (timeIntervalToKeep.End.Value + 0.5 - timeIntervalToKeep.Start);
             }
-
-           
         }
     }
 }
