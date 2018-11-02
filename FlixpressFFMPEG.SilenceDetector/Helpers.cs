@@ -35,7 +35,8 @@ namespace FlixpressFFMPEG.SilenceDetector
             return silenceTimeIntervals;
         }
         
-        public static List<TimeInterval> ExtractAudibleTimeIntervals(List<TimeInterval> allSilenceTimeIntervals, double minimumSilenceIntervalToCut = 1.0, double audibleClipSilencePadding = 0.2)
+        public static List<TimeInterval> ExtractAudibleTimeIntervals(List<TimeInterval> allSilenceTimeIntervals, double minimumSilenceIntervalToCut = 1.0, 
+            double audibleClipSilencePadding = 0.2, bool includeSilenceIntervals = false)
         {
             /* Here's where we'll do the math. We'll test this one extensively before involving FFMPEG.
              */
@@ -74,14 +75,35 @@ namespace FlixpressFFMPEG.SilenceDetector
                 audibleTimeIntervals.Add(audibleTimeInterval);
             }
 
-            return audibleTimeIntervals;
+            if (!includeSilenceIntervals)
+                return audibleTimeIntervals;
+
+            List<TimeInterval> includesSilenceIntervals = new List<TimeInterval>();
+
+            for(int j = 0; j < audibleTimeIntervals.Count - 1; j++)
+            {
+                includesSilenceIntervals.Add(audibleTimeIntervals[j]);
+                TimeInterval nextAudibleTimeInterval = audibleTimeIntervals[j + 1];
+
+                TimeInterval silenceInterval = new TimeInterval(
+                    start: audibleTimeIntervals[j].End.Value,
+                    end: nextAudibleTimeInterval.Start
+                    );
+
+                includesSilenceIntervals.Add(silenceInterval);
+            }
+
+            includesSilenceIntervals.Add(audibleTimeIntervals.Last());
+
+            return includesSilenceIntervals;
         }
 
-        public static List<TimeInterval> ExtractAudibleTimeIntervals(string silenceQueryOutput, double minimumSilenceIntervalToCut = 1.0, double audibleClipSilencePadding = 0.2)
+        public static List<TimeInterval> ExtractAudibleTimeIntervals(string silenceQueryOutput, double minimumSilenceIntervalToCut = 1.0, double audibleClipSilencePadding = 0.2,
+            bool includeSilenceIntervals = false)
         {
             List<TimeInterval> allSilenceTimeIntervals = ExtractSilenceTimeIntervals(silenceQueryOutput);
 
-            return ExtractAudibleTimeIntervals(allSilenceTimeIntervals, minimumSilenceIntervalToCut, audibleClipSilencePadding);
+            return ExtractAudibleTimeIntervals(allSilenceTimeIntervals, minimumSilenceIntervalToCut, audibleClipSilencePadding, includeSilenceIntervals);
         }
 
 

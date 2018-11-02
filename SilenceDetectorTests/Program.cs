@@ -28,7 +28,8 @@ namespace SilenceDetectorTests
             double minimalSilenceIntervalToCut = 1;
             double audibleClipSilencePadding = 0.2;
 
-            AudibleDetectorExecutor.Execute(ffmpegExecutablePath, inputFilename, minimalSilenceIntervalToCut, audibleClipSilencePadding);
+            AudibleDetectorExecutor.Execute(ffmpegExecutablePath, inputFilename, minimalSilenceIntervalToCut, audibleClipSilencePadding,
+                includeSilenceIntervals: true);
 
             Console.ReadLine();
         }
