@@ -5,7 +5,9 @@ VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "silenceDetector", "silenceDetector\silenceDetector.csproj", "{A3EDB939-B57F-4EB3-8178-93E5D5F7932C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlixpressFFMPEG.SilenceDetector", "FlixpressFFMPEG.SilenceDetector\FlixpressFFMPEG.SilenceDetector.csproj", "{424D911F-2E90-4A82-B0B5-BF95BE530C28}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlixpressFFMPEG.SilenceDetector", "FlixpressFFMPEG.SilenceDetector\FlixpressFFMPEG.SilenceDetector.csproj", "{424D911F-2E90-4A82-B0B5-BF95BE530C28}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SilenceDetectorTests", "SilenceDetectorTests\SilenceDetectorTests.csproj", "{C753FA61-5722-4E06-A9D3-969D43375E59}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{424D911F-2E90-4A82-B0B5-BF95BE530C28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{424D911F-2E90-4A82-B0B5-BF95BE530C28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{424D911F-2E90-4A82-B0B5-BF95BE530C28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C753FA61-5722-4E06-A9D3-969D43375E59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C753FA61-5722-4E06-A9D3-969D43375E59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C753FA61-5722-4E06-A9D3-969D43375E59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C753FA61-5722-4E06-A9D3-969D43375E59}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

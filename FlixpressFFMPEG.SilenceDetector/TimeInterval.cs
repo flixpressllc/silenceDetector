@@ -14,5 +14,13 @@
             Start = start;
             End = end;
         }
+
+        public double? CalculateDuration()
+        {
+            if (End.HasValue)
+                return End - Start;
+
+            return null;
+        }
     }
 }
